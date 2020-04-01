@@ -36,7 +36,6 @@
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
 #include <boost/scope_exit.hpp>
 #include <boost/thread/xtime.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
@@ -373,7 +372,7 @@ bool Snapshotter::triggerSnapshotCb(rosbag_snapshot_msgs::TriggerSnapshot::Reque
   // Write each selected topic's queue to bag file
   if (req.topics.size())
   {
-    BOOST_FOREACH(std::string& topic, req.topics)
+    for (std::string& topic : req.topics)
     {
       // Resolve and clean topic
       try
@@ -402,7 +401,7 @@ bool Snapshotter::triggerSnapshotCb(rosbag_snapshot_msgs::TriggerSnapshot::Reque
   // If topic list empty, record all buffered topics
   else
   {
-    BOOST_FOREACH(buffers_t::value_type& pair, buffers_)
+    for (const buffers_t::value_type& pair : buffers_)
     {
       MessageQueue& message_queue = *(pair.second);
       std::string const& topic = pair.first;
@@ -425,7 +424,7 @@ bool Snapshotter::triggerSnapshotCb(rosbag_snapshot_msgs::TriggerSnapshot::Reque
 
 void Snapshotter::clear()
 {
-  BOOST_FOREACH(buffers_t::value_type& pair, buffers_)
+  for (const buffers_t::value_type& pair : buffers_)
   {
     pair.second->clear();
   }
@@ -483,7 +482,7 @@ void Snapshotter::publishStatus(ros::TimerEvent const& e)
     msg.enabled = recording_;
   }
   std::string node_id = ros::this_node::getName();
-  BOOST_FOREACH(buffers_t::value_type& pair, buffers_)
+  for (const buffers_t::value_type& pair : buffers_)
   {
     rosgraph_msgs::TopicStatistics status;
     status.node_sub = node_id;
@@ -501,7 +500,7 @@ int Snapshotter::run()
     return 0;
 
   // Create the queue for each topic and set up the subscriber to add to it on new messages
-  BOOST_FOREACH(SnapshotterOptions::topics_t::value_type& pair, options_.topics_)
+  for (SnapshotterOptions::topics_t::value_type& pair : options_.topics_)
   {
     string topic = ros::names::resolve(nh_.getNamespace(), pair.first);
     fixTopicOptions(pair.second);

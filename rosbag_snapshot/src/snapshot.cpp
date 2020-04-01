@@ -108,8 +108,10 @@ bool parseVariablesMap(SnapshotterOptions& opts, po::variables_map const& vm)
   if (vm.count("topic"))
   {
     std::vector<std::string> topics = vm["topic"].as<std::vector<std::string> >();
-    BOOST_FOREACH(std::string& str, topics)
+    for (const std::string& str : topics)
+    {
       opts.addTopic(str);
+    }
   }
   opts.default_memory_limit_ = static_cast<int>(MB_TO_BYTES * vm["size"].as<double>());
   opts.default_duration_limit_ = ros::Duration(vm["duration"].as<double>());
