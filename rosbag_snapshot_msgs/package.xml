@@ -1,14 +1,18 @@
-<package>
+<?xml version="1.0"?>
+<package format="2">
   <name>rosbag_snapshot_msgs</name>
   <version>1.0.0</version>
   <description>Service and message definitions for rosbag_snapshot</description>
-  <maintainer email="dthomas@osrfoundation.org">Dirk Thomas</maintainer>
-  <license>BSD</license>
-  <author>Kevin Allen</author>
-  <buildtool_depend>catkin</buildtool_depend>
 
+  <author>Kevin Allen</author>
+  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>rosgraph_msgs</depend>
   <build_depend>message_generation</build_depend>
-  <build_depend>rosgraph_msgs</build_depend>
-  <run_depend>message_runtime</run_depend>
-  <run_depend>rosgraph_msgs</run_depend>
+  <build_export_depend>message_runtime</build_export_depend>
+  <exec_depend>message_runtime</exec_depend>
+
 </package>

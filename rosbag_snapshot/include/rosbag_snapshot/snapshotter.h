@@ -34,9 +34,6 @@
 #ifndef ROSBAG_SNAPSHOT_SNAPSHOTTER_H
 #define ROSBAG_SNAPSHOT_SNAPSHOTTER_H
 
-#include <deque>
-#include <map>
-#include <string>
 #include <boost/atomic.hpp>
 #include <boost/thread/mutex.hpp>
 #include <ros/ros.h>
@@ -45,9 +42,14 @@
 #include <std_srvs/SetBool.h>
 #include <topic_tools/shape_shifter.h>
 #include <rosgraph_msgs/TopicStatistics.h>
-#include <rosbag_snapshot_msgs/SnapshotStatus.h>
-#include "rosbag/bag.h"
-#include "rosbag/macros.h"
+#include <rosbag_msgs/SnapshotStatus.h>
+#include <rosbag/bag.h>
+#include <rosbag/macros.h>
+#include <deque>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace rosbag_snapshot
 {
@@ -96,7 +98,8 @@ struct ROSBAG_DECL SnapshotterOptions
                     ros::Duration status_period = ros::Duration(1));
 
   // Add a new topic to the configuration
-  void addTopic(std::string const& topic, ros::Duration duration_limit = SnapshotterTopicOptions::INHERIT_DURATION_LIMIT,
+  void addTopic(std::string const& topic,
+                ros::Duration duration_limit = SnapshotterTopicOptions::INHERIT_DURATION_LIMIT,
                 int32_t memory_limit = SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT);
 };
 
@@ -134,7 +137,7 @@ private:
   boost::shared_ptr<ros::Subscriber> sub_;
 
 public:
-  MessageQueue(SnapshotterTopicOptions const& options);
+  explicit MessageQueue(SnapshotterTopicOptions const& options);
   // Add a new message to the internal queue if possible, truncating the front of the queue as needed to enforce limits
   void push(SnapshotMessage const& msg);
   // Removes the message at the front of the queue (oldest) and returns it
@@ -171,7 +174,7 @@ private:
 class ROSBAG_DECL Snapshotter
 {
 public:
-  Snapshotter(SnapshotterOptions const& options);
+  explicit Snapshotter(SnapshotterOptions const& options);
   // Sets up callbacks and spins until node is killed
   int run();
 
@@ -207,7 +210,8 @@ private:
   void topicCB(const ros::MessageEvent<topic_tools::ShapeShifter const>& msg_event,
                boost::shared_ptr<MessageQueue> queue);
   // Service callback, write all of part of the internal buffers to a bag file according to request parameters
-  bool triggerSnapshotCb(rosbag_snapshot_msgs::TriggerSnapshot::Request& req, rosbag_snapshot_msgs::TriggerSnapshot::Response& res);
+  bool triggerSnapshotCb(rosbag_snapshot_msgs::TriggerSnapshot::Request& req,
+                         rosbag_snapshot_msgs::TriggerSnapshot::Response& res);
   // Service callback, enable or disable recording (storing new messages into queue). Used to pause before writing
   bool enableCB(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
   // Set recording_ to false and do nessesary cleaning, CALLER MUST OBTAIN LOCK
@@ -219,7 +223,8 @@ private:
   // Write the parts of message_queue within the time constraints of req to the queue
   // If returns false, there was an error opening/writing the bag and an error message was written to res.message
   bool writeTopic(rosbag::Bag& bag, MessageQueue& message_queue, std::string const& topic,
-                  rosbag_snapshot_msgs::TriggerSnapshot::Request& req, rosbag_snapshot_msgs::TriggerSnapshot::Response& res);
+                  rosbag_snapshot_msgs::TriggerSnapshot::Request& req,
+                  rosbag_snapshot_msgs::TriggerSnapshot::Response& res);
 };
 
 // Configuration for SnapshotterClient

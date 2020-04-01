@@ -18,6 +18,15 @@ add_executable(snapshot src/snapshot.cpp)
 add_dependencies(snapshot ${catkin_EXPORTED_TARGETS})
 target_link_libraries(snapshot rosbag_snapshot ${catkin_LIBRARIES})
 
+if(CATKIN_ENABLE_TESTING)
+  find_package(catkin REQUIRED COMPONENTS roslint rostest)
+  roslint_python(test)
+  roslint_cpp()
+  roslint_add_test()
+
+  add_rostest(test/snapshot.test)
+endif()
+
 install(TARGETS snapshot
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

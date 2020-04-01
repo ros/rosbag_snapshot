@@ -32,12 +32,13 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 ********************************************************************/
 
-#include "rosbag_snapshot/snapshotter.h"
-#include "rosbag/exceptions.h"
+#include <rosbag_snapshot/snapshotter.h>
+#include <rosbag/exceptions.h>
 
-#include "boost/program_options.hpp"
+#include <boost/program_options.hpp>
 #include <string>
 #include <sstream>
+#include <vector>
 
 namespace po = boost::program_options;
 
@@ -66,11 +67,15 @@ bool parseOptions(po::variables_map& vm, int argc, char** argv)
     ("trigger-write,t", "Write buffer of selected topcis to a bag file")
     ("pause,p", "Stop buffering new messages until resumed or write is triggered")
     ("resume,r", "Resume buffering new messages, writing over older messages as needed")
-    ("size,s", po::value<double>()->default_value(-1), "Maximum memory per topic to use in buffering in MB. Default: no limit")
-    ("duration,d", po::value<double>()->default_value(30.0), "Maximum difference between newest and oldest buffered message per topic in seconds. Default: 30")
-    ("output-prefix,o", po::value<std::string>()->default_value(""), "When in trigger write mode, prepend PREFIX to name of writting bag file")
+    ("size,s", po::value<double>()->default_value(-1),
+     "Maximum memory per topic to use in buffering in MB. Default: no limit")
+    ("duration,d", po::value<double>()->default_value(30.0),
+     "Maximum difference between newest and oldest buffered message per topic in seconds. Default: 30")
+    ("output-prefix,o", po::value<std::string>()->default_value(""),
+     "When in trigger write mode, prepend PREFIX to name of writting bag file")
     ("output-filename,O", po::value<std::string>(), "When in trigger write mode, exact name of written bag file")
-    ("topic", po::value<std::vector<std::string> >(), "Topic to buffer. If triggering write, write only these topics instead of all buffered topics.");
+    ("topic", po::value<std::vector<std::string> >(),
+     "Topic to buffer. If triggering write, write only these topics instead of all buffered topics.");
   // clang-format on
   po::positional_options_description p;
   p.add("topic", -1);
@@ -103,10 +108,10 @@ bool parseVariablesMap(SnapshotterOptions& opts, po::variables_map const& vm)
   if (vm.count("topic"))
   {
     std::vector<std::string> topics = vm["topic"].as<std::vector<std::string> >();
-    BOOST_FOREACH (std::string& str, topics)
+    BOOST_FOREACH(std::string& str, topics)
       opts.addTopic(str);
   }
-  opts.default_memory_limit_ = int(MB_TO_BYTES * vm["size"].as<double>());
+  opts.default_memory_limit_ = static_cast<int>(MB_TO_BYTES * vm["size"].as<double>());
   opts.default_duration_limit_ = ros::Duration(vm["duration"].as<double>());
   return true;
 }
@@ -142,7 +147,7 @@ void appendParamOptions(ros::NodeHandle& nh, SnapshotterOptions& opts)
   // Override program options for default limits if the parameters are set.
   double tmp;
   if (nh.getParam("default_memory_limit", tmp))
-    opts.default_memory_limit_ = int(MB_TO_BYTES * tmp);
+    opts.default_memory_limit_ = static_cast<int>(MB_TO_BYTES * tmp);
   if (nh.getParam("default_duration_limit", tmp))
     opts.default_duration_limit_ = ros::Duration(tmp);
 
@@ -195,7 +200,7 @@ void appendParamOptions(ros::NodeHandle& nh, SnapshotterOptions& opts)
         if (mem_limit.getType() == XmlRpcValue::TypeDouble)
         {
           double mb = mem_limit;
-          mem = int(MB_TO_BYTES * mb);
+          mem = static_cast<int>(MB_TO_BYTES * mb);
         }
         else if (mem_limit.getType() == XmlRpcValue::TypeInt)
         {
