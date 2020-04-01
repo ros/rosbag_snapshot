@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rosbag_snapshot</name>
+  <version>0.0.0</version>
+  <description>The rosbag_snapshot package</description>
+
+  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>rosbag</depend>
+  <depend>rosbag_snapshot_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>rosgraph_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>topic_tools</depend>
+  <test_depend>roslint</test_depend>
+  <test_depend>rospy</test_depend>
+  <test_depend>rostest</test_depend>
+  <test_depend>rostopic</test_depend>
+  <test_depend>std_msgs</test_depend>
+
+</package>

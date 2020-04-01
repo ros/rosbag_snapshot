@@ -39,8 +39,8 @@ import rospy
 from rosbag import Bag
 from std_msgs.msg import String
 from std_srvs.srv import SetBool
-from rosbag_msgs.msg import SnapshotStatus
-from rosbag_msgs.srv import TriggerSnapshot, TriggerSnapshotRequest, TriggerSnapshotResponse
+from rosbag_snapshot_msgs.msg import SnapshotStatus
+from rosbag_snapshot_msgs.srv import TriggerSnapshot, TriggerSnapshotRequest, TriggerSnapshotResponse
 
 
 class TestRosbagSnapshot(unittest.TestCase):

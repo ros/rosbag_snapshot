@@ -32,7 +32,7 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 ********************************************************************/
 
-#include "rosbag/snapshotter.h"
+#include "rosbag_snapshot/snapshotter.h"
 #include "rosbag/exceptions.h"
 
 #include "boost/program_options.hpp"
@@ -41,11 +41,11 @@
 
 namespace po = boost::program_options;
 
-using rosbag::Snapshotter;
-using rosbag::SnapshotterClient;
-using rosbag::SnapshotterOptions;
-using rosbag::SnapshotterTopicOptions;
-using rosbag::SnapshotterClientOptions;
+using rosbag_snapshot::Snapshotter;
+using rosbag_snapshot::SnapshotterClient;
+using rosbag_snapshot::SnapshotterOptions;
+using rosbag_snapshot::SnapshotterTopicOptions;
+using rosbag_snapshot::SnapshotterClientOptions;
 
 const int MB_TO_BYTES = 1E6;
 
@@ -247,6 +247,6 @@ int main(int argc, char** argv)
   }
 
   // Run the snapshotter
-  rosbag::Snapshotter snapshotter(opts);
+  rosbag_snapshot::Snapshotter snapshotter(opts);
   return snapshotter.run();
 }

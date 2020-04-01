@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(rosbag_msgs)
+project(rosbag_snapshot_msgs)
 
 find_package(catkin REQUIRED COMPONENTS message_generation rosgraph_msgs)
 
