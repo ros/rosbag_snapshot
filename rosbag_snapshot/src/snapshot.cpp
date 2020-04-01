@@ -87,13 +87,13 @@ bool parseOptions(po::variables_map& vm, int argc, char** argv)
   }
   catch (boost::program_options::error const& e)
   {
-    std::cout << "rosbag snapshot: " << e.what() << std::endl;
+    std::cout << "rosbag_snapshot: " << e.what() << std::endl;
     return false;
   }
 
   if (vm.count("help"))
   {
-    std::cout << "Usage: rosbag snapshot [options] [topic1 topic2 ...]" << std::endl
+    std::cout << "Usage: rosrun rosbag_snapshot snapshot [options] [topic1 topic2 ...]" << std::endl
               << std::endl
               << "Buffer recent messages until triggered to write or trigger an already running instance." << std::endl
               << std::endl;
@@ -139,7 +139,7 @@ bool parseVariablesMapClient(SnapshotterClientOptions& opts, po::variables_map c
 
 /* Read configured topics and limits from ROS params
  * TODO: use exceptions instead of asserts to follow style conventions
- * See snapshot.test in test_rosbag for an example
+ * See snapshot.test for an example
  */
 void appendParamOptions(ros::NodeHandle& nh, SnapshotterOptions& opts)
 {
