@@ -4,7 +4,7 @@
   <version>1.0.0</version>
   <description>Service and message definitions for rosbag_snapshot</description>
 
-  <author>Kevin Allen</author>
+  <author email="kma1660+rsp@gmail.com">Kevin Allen</author>
   <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
 
   <license>BSD</license>
