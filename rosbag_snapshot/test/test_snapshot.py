@@ -37,7 +37,6 @@ import tempfile
 import unittest
 import rospy
 from rosbag import Bag
-from std_msgs.msg import String
 from std_srvs.srv import SetBool
 from rosbag_snapshot_msgs.msg import SnapshotStatus
 from rosbag_snapshot_msgs.srv import TriggerSnapshot, TriggerSnapshotRequest, TriggerSnapshotResponse
@@ -45,7 +44,7 @@ from rosbag_snapshot_msgs.srv import TriggerSnapshot, TriggerSnapshotRequest, Tr
 
 class TestRosbagSnapshot(unittest.TestCase):
     '''
-    Tests the "rosbag snapshot" command.
+    Tests the "rosbag_snapshot" command.
     Relies on the nodes launched in snapshot.test
     '''
     def __init__(self, *args):

@@ -36,7 +36,6 @@
 #include <string>
 #include <vector>
 #include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
 #include <boost/scope_exit.hpp>
 #include <boost/thread/xtime.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
@@ -44,7 +43,8 @@
 #include <ros/assert.h>
 #include <topic_tools/shape_shifter.h>
 #include <rosbag_snapshot_msgs/SnapshotStatus.h>
-#include "rosbag_snapshot/snapshotter.h"
+#include <rosbag_snapshot/snapshotter.h>
+#include <utility>
 
 using std::string;
 using boost::shared_ptr;
@@ -130,7 +130,7 @@ ros::Duration MessageQueue::duration() const
 bool MessageQueue::preparePush(int32_t size, ros::Time const& time)
 {
   // If new message is older than back of queue, time has gone backwards and buffer must be cleared
-  if (!queue_.empty() and time < queue_.back().time)
+  if (!queue_.empty() && time < queue_.back().time)
   {
     ROS_WARN("Time has gone backwards. Clearing buffer for this topic.");
     _clear();
@@ -180,7 +180,7 @@ void MessageQueue::_push(SnapshotMessage const& _out)
 {
   int32_t size = _out.msg->size();
   // If message cannot be added without violating limits, it must be dropped
-  if (not preparePush(size, _out.time))
+  if (!preparePush(size, _out.time))
     return;
   queue_.push_back(_out);
   // Add size of new message to running count to maintain correctness
@@ -202,14 +202,14 @@ MessageQueue::range_t MessageQueue::rangeFromTimes(Time const& start, Time const
   range_t::second_type end = queue_.end();
 
   // Increment / Decrement iterators until time contraints are met
-  if (not start.isZero())
+  if (!start.isZero())
   {
-    while (begin != end and (*begin).time < start)
+    while (begin != end && (*begin).time < start)
       ++begin;
   }
-  if (not stop.isZero())
+  if (!stop.isZero())
   {
-    while (end != begin and (*(end - 1)).time > stop)
+    while (end != begin && (*(end - 1)).time > stop)
       --end;
   }
   return range_t(begin, end);
@@ -288,7 +288,8 @@ void Snapshotter::subscribe(string const& topic, boost::shared_ptr<MessageQueue>
 }
 
 bool Snapshotter::writeTopic(rosbag::Bag& bag, MessageQueue& message_queue, string const& topic,
-                            rosbag_snapshot_msgs::TriggerSnapshot::Request& req, rosbag_snapshot_msgs::TriggerSnapshot::Response& res)
+                             rosbag_snapshot_msgs::TriggerSnapshot::Request& req,
+                             rosbag_snapshot_msgs::TriggerSnapshot::Response& res)
 {
   // acquire lock for this queue
   boost::mutex::scoped_lock l(message_queue.lock);
@@ -296,7 +297,7 @@ bool Snapshotter::writeTopic(rosbag::Bag& bag, MessageQueue& message_queue, stri
   MessageQueue::range_t range = message_queue.rangeFromTimes(req.start_time, req.stop_time);
 
   // open bag if this the first valid topic and there is data
-  if (not bag.isOpen() and range.second > range.first)
+  if (!bag.isOpen() && range.second > range.first)
   {
     try
     {
@@ -331,7 +332,7 @@ bool Snapshotter::writeTopic(rosbag::Bag& bag, MessageQueue& message_queue, stri
 bool Snapshotter::triggerSnapshotCb(rosbag_snapshot_msgs::TriggerSnapshot::Request& req,
                                    rosbag_snapshot_msgs::TriggerSnapshot::Response& res)
 {
-  if (not postfixFilename(req.filename))
+  if (!postfixFilename(req.filename))
   {
     res.success = false;
     res.message = "invalid";
@@ -371,7 +372,7 @@ bool Snapshotter::triggerSnapshotCb(rosbag_snapshot_msgs::TriggerSnapshot::Reque
   // Write each selected topic's queue to bag file
   if (req.topics.size())
   {
-    BOOST_FOREACH (std::string& topic, req.topics)
+    for (std::string& topic : req.topics)
     {
       // Resolve and clean topic
       try
@@ -393,24 +394,24 @@ bool Snapshotter::triggerSnapshotCb(rosbag_snapshot_msgs::TriggerSnapshot::Reque
         continue;
       }
       MessageQueue& message_queue = *(*found).second;
-      if (not writeTopic(bag, message_queue, topic, req, res))
+      if (!writeTopic(bag, message_queue, topic, req, res))
         return true;
     }
   }
   // If topic list empty, record all buffered topics
   else
   {
-    BOOST_FOREACH (buffers_t::value_type& pair, buffers_)
+    for (const buffers_t::value_type& pair : buffers_)
     {
       MessageQueue& message_queue = *(pair.second);
       std::string const& topic = pair.first;
-      if (not writeTopic(bag, message_queue, topic, req, res))
+      if (!writeTopic(bag, message_queue, topic, req, res))
         return true;
     }
   }
 
   // If no topics were subscribed/valid/contained data, this is considered a non-success
-  if (not bag.isOpen())
+  if (!bag.isOpen())
   {
     res.success = false;
     res.message = res.NO_DATA;
@@ -423,7 +424,7 @@ bool Snapshotter::triggerSnapshotCb(rosbag_snapshot_msgs::TriggerSnapshot::Reque
 
 void Snapshotter::clear()
 {
-  BOOST_FOREACH (buffers_t::value_type& pair, buffers_)
+  for (const buffers_t::value_type& pair : buffers_)
   {
     pair.second->clear();
   }
@@ -452,12 +453,12 @@ bool Snapshotter::enableCB(std_srvs::SetBool::Request& req, std_srvs::SetBool::R
     return true;
   }
   // Obtain write lock and update state if requested state is different from current
-  if (req.data and not recording_)
+  if (req.data && !recording_)
   {
     boost::upgrade_to_unique_lock<boost::upgrade_mutex> write_lock(read_lock);
     resume();
   }
-  else if (not req.data and recording_)
+  else if (!req.data && recording_)
   {
     boost::upgrade_to_unique_lock<boost::upgrade_mutex> write_lock(read_lock);
     pause();
@@ -473,14 +474,15 @@ void Snapshotter::publishStatus(ros::TimerEvent const& e)
   if (!status_pub_.getNumSubscribers())
     return;
 
-  // TODO: consider options to make this faster (caching and updating last status, having queues track their own status)
-  rosbag_snapshot_msgs::SnapshotStatus msg;
+  // TODO(any): consider options to make this faster
+  // (caching and updating last status, having queues track their own status)
+  rosbag_msgs::SnapshotStatus msg;
   {
     boost::shared_lock<boost::upgrade_mutex> lock(state_lock_);
     msg.enabled = recording_;
   }
   std::string node_id = ros::this_node::getName();
-  BOOST_FOREACH (buffers_t::value_type& pair, buffers_)
+  for (const buffers_t::value_type& pair : buffers_)
   {
     rosgraph_msgs::TopicStatistics status;
     status.node_sub = node_id;
@@ -498,7 +500,7 @@ int Snapshotter::run()
     return 0;
 
   // Create the queue for each topic and set up the subscriber to add to it on new messages
-  BOOST_FOREACH (SnapshotterOptions::topics_t::value_type& pair, options_.topics_)
+  for (SnapshotterOptions::topics_t::value_type& pair : options_.topics_)
   {
     string topic = ros::names::resolve(nh_.getNamespace(), pair.first);
     fixTopicOptions(pair.second);
@@ -532,7 +534,7 @@ int SnapshotterClient::run(SnapshotterClientOptions const& opts)
   if (opts.action_ == SnapshotterClientOptions::TRIGGER_WRITE)
   {
     ros::ServiceClient client = nh_.serviceClient<rosbag_snapshot_msgs::TriggerSnapshot>("trigger_snapshot");
-    if (not client.exists())
+    if (!client.exists())
     {
       ROS_ERROR("Service %s does not exist. Is snapshot running in this namespace?", "trigger_snapshot");
       return 1;
@@ -556,18 +558,18 @@ int SnapshotterClient::run(SnapshotterClientOptions const& opts)
     }
 
     // Resolve filename relative to clients working directory to avoid confusion
-    if (req.filename.empty()) // Special case of no specified file, ensure still in working directory of client
+    if (req.filename.empty())  // Special case of no specified file, ensure still in working directory of client
       req.filename = "./";
     boost::filesystem::path p(boost::filesystem::system_complete(req.filename));
     req.filename = p.string();
 
     rosbag_snapshot_msgs::TriggerSnapshotResponse res;
-    if (not client.call(req, res))
+    if (!client.call(req, res))
     {
       ROS_ERROR("Failed to call service");
       return 1;
     }
-    if (not res.success)
+    if (!res.success)
     {
       ROS_ERROR("%s", res.message.c_str());
       return 1;
@@ -577,7 +579,7 @@ int SnapshotterClient::run(SnapshotterClientOptions const& opts)
   else if (opts.action_ == SnapshotterClientOptions::PAUSE || opts.action_ == SnapshotterClientOptions::RESUME)
   {
     ros::ServiceClient client = nh_.serviceClient<std_srvs::SetBool>("enable_snapshot");
-    if (not client.exists())
+    if (!client.exists())
     {
       ROS_ERROR("Service %s does not exist. Is snapshot running in this namespace?", "enable_snapshot");
       return 1;
@@ -585,12 +587,12 @@ int SnapshotterClient::run(SnapshotterClientOptions const& opts)
     std_srvs::SetBoolRequest req;
     req.data = (opts.action_ == SnapshotterClientOptions::RESUME);
     std_srvs::SetBoolResponse res;
-    if (not client.call(req, res))
+    if (!client.call(req, res))
     {
       ROS_ERROR("Failed to call service.");
       return 1;
     }
-    if (not res.success)
+    if (!res.success)
     {
       ROS_ERROR("%s", res.message.c_str());
       return 1;
