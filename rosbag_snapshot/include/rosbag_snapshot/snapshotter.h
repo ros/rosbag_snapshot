@@ -175,6 +175,8 @@ class ROSBAG_DECL Snapshotter
 {
 public:
   explicit Snapshotter(SnapshotterOptions const& options);
+  ~Snapshotter();
+
   // Sets up callbacks and spins until node is killed
   int run();
 

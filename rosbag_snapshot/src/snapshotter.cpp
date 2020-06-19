@@ -222,6 +222,16 @@ Snapshotter::Snapshotter(SnapshotterOptions const& options) : options_(options),
   status_pub_ = nh_.advertise<rosbag_snapshot_msgs::SnapshotStatus>("snapshot_status", 10);
 }
 
+Snapshotter::~Snapshotter()
+{
+  // Each buffer contains a pointer to the subscriber and vice versa, so we need to
+  // shutdown the subscriber to allow garbage collection to happen
+  for (std::pair<const std::string, boost::shared_ptr<MessageQueue>>& buffer : buffers_)
+  {
+    buffer.second->sub_->shutdown();
+  }
+}
+
 void Snapshotter::fixTopicOptions(SnapshotterTopicOptions& options)
 {
   if (options.duration_limit_ == SnapshotterTopicOptions::INHERIT_DURATION_LIMIT)
@@ -254,7 +264,7 @@ string Snapshotter::timeAsStr()
 }
 
 void Snapshotter::topicCB(const ros::MessageEvent<topic_tools::ShapeShifter const>& msg_event,
-                         boost::shared_ptr<MessageQueue> queue)
+                          boost::shared_ptr<MessageQueue> queue)
 {
   // If recording is paused (or writing), exit
   {
