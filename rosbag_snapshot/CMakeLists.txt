@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rosbag_snapshot)
+set_directory_properties(PROPERTIES COMPILE_OPTIONS "-std=c++11")
 
 find_package(catkin REQUIRED COMPONENTS rosbag rosbag_snapshot_msgs roscpp rosgraph_msgs std_srvs topic_tools)
 
