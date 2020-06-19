@@ -486,7 +486,7 @@ void Snapshotter::publishStatus(ros::TimerEvent const& e)
 
   // TODO(any): consider options to make this faster
   // (caching and updating last status, having queues track their own status)
-  rosbag_msgs::SnapshotStatus msg;
+  rosbag_snapshot_msgs::SnapshotStatus msg;
   {
     boost::shared_lock<boost::upgrade_mutex> lock(state_lock_);
     msg.enabled = recording_;
