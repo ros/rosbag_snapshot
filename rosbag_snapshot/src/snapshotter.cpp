@@ -38,6 +38,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/scope_exit.hpp>
 #include <boost/thread/xtime.hpp>
+#include <boost/thread/shared_mutex.hpp>
 #include <boost/date_time/local_time/local_time.hpp>
 #include <ros/ros.h>
 #include <ros/assert.h>
