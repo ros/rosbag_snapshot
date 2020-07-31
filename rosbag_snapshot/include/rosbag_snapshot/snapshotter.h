@@ -102,7 +102,7 @@ struct ROSBAG_DECL SnapshotterOptions
                     ros::Duration status_period = ros::Duration(1));
 
   // Add a new topic to the configuration
-  void addTopic(std::string const& topic,
+  bool addTopic(std::string const& topic,
                 ros::Duration duration_limit = SnapshotterTopicOptions::INHERIT_DURATION_LIMIT,
                 int32_t memory_limit = SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT);
 };

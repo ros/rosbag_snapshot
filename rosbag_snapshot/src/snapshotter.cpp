@@ -74,12 +74,12 @@ SnapshotterOptions::SnapshotterOptions(ros::Duration default_duration_limit, int
 {
 }
 
-void SnapshotterOptions::addTopic(std::string const& topic, ros::Duration duration, int32_t memory)
+bool SnapshotterOptions::addTopic(std::string const& topic, ros::Duration duration, int32_t memory)
 {
   SnapshotterTopicOptions ops(duration, memory);
   std::pair<topics_t::iterator, bool> ret;
   ret = topics_.insert(topics_t::value_type(topic, ops));
-  ROS_INFO_COND(ret.second, "Added %s", topic.c_str());
+  return ret.second;
 }
 
 SnapshotterClientOptions::SnapshotterClientOptions() : action_(SnapshotterClientOptions::TRIGGER_WRITE)
@@ -517,7 +517,17 @@ void Snapshotter::pollTopics(ros::TimerEvent const& e, rosbag_snapshot::Snapshot
   {
     for (ros::master::TopicInfo const& t : topics)
     {
-      options->addTopic(t.name);
+      std::string topic = t.name;
+      if (options->addTopic(topic))
+      {
+        SnapshotterTopicOptions topic_options;
+        fixTopicOptions(topic_options);
+        shared_ptr<MessageQueue> queue;
+        queue.reset(new MessageQueue(topic_options));
+        std::pair<buffers_t::iterator, bool> res = buffers_.insert(buffers_t::value_type(topic, queue));
+        ROS_ASSERT_MSG(res.second, "failed to add %s to topics. Perhaps it is a duplicate?", topic.c_str());
+        subscribe(topic, queue);
+      }
     }
   }
 }
