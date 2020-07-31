@@ -228,7 +228,7 @@ private:
   // Publish status containing statistics of currently buffered topics and other state
   void publishStatus(ros::TimerEvent const& e);
   // Poll master for new topics
-  void pollTopics(ros::TimerEvent const& e);
+  void pollTopics(ros::TimerEvent const& e, rosbag_snapshot::SnapshotterOptions *options);
   // Write the parts of message_queue within the time constraints of req to the queue
   // If returns false, there was an error opening/writing the bag and an error message was written to res.message
   bool writeTopic(rosbag::Bag& bag, MessageQueue& message_queue, std::string const& topic,
