@@ -201,6 +201,7 @@ private:
   ros::ServiceServer enable_server_;
   ros::Publisher status_pub_;
   ros::Timer status_timer_;
+  ros::Timer poll_topic_timer_;
 
   // Replace individual topic limits with node defaults if they are flagged for it (see SnapshotterTopicOptions)
   void fixTopicOptions(SnapshotterTopicOptions& options);
@@ -226,6 +227,8 @@ private:
   void resume();
   // Publish status containing statistics of currently buffered topics and other state
   void publishStatus(ros::TimerEvent const& e);
+  // Poll master for new topics
+  void pollTopics(ros::TimerEvent const& e);
   // Write the parts of message_queue within the time constraints of req to the queue
   // If returns false, there was an error opening/writing the bag and an error message was written to res.message
   bool writeTopic(rosbag::Bag& bag, MessageQueue& message_queue, std::string const& topic,

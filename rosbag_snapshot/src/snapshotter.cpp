@@ -506,6 +506,12 @@ void Snapshotter::publishStatus(ros::TimerEvent const& e)
   status_pub_.publish(msg);
 }
 
+void Snapshotter::pollTopics(ros::TimerEvent const& e)
+{
+  (void)e;
+  ROS_DEBUG("Ping");
+}
+
 int Snapshotter::run()
 {
   if (!nh_.ok())
@@ -530,6 +536,10 @@ int Snapshotter::run()
   // Start timer to publish status regularly
   if (options_.status_period_ > ros::Duration(0))
     status_timer_ = nh_.createTimer(options_.status_period_, &Snapshotter::publishStatus, this);
+
+  // Start timer to poll ROS master for topics
+  if (options_.all_topics_)
+    poll_topic_timer_ = nh_.createTimer(ros::Duration(1.0), &Snapshotter::pollTopics, this);
 
   // Use multiple callback threads
   ros::MultiThreadedSpinner spinner(4);  // Use 4 threads
