@@ -381,7 +381,7 @@ bool Snapshotter::triggerSnapshotCb(rosbag_snapshot_msgs::TriggerSnapshot::Reque
   rosbag::Bag bag;
 
   // Write each selected topic's queue to bag file
-  if (req.topics.size())
+  if (req.topics.size() && req.topics.at(0).size())
   {
     for (std::string& topic : req.topics)
     {
