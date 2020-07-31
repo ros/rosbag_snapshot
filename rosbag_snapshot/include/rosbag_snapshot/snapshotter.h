@@ -91,6 +91,9 @@ struct ROSBAG_DECL SnapshotterOptions
   int32_t default_memory_limit_;
   // Period between publishing topic status messages. If <= ros::Duration(0), don't publish status
   ros::Duration status_period_;
+  // Flag if all topics should be recorded
+  bool all_topics_;
+
   typedef std::map<std::string, SnapshotterTopicOptions> topics_t;
   // Provides list of topics to snapshot and their limit configurations
   topics_t topics_;

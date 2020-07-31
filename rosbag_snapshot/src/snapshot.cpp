@@ -67,6 +67,7 @@ bool parseOptions(po::variables_map& vm, int argc, char** argv)
     ("trigger-write,t", "Write buffer of selected topcis to a bag file")
     ("pause,p", "Stop buffering new messages until resumed or write is triggered")
     ("resume,r", "Resume buffering new messages, writing over older messages as needed")
+    ("all,a", "Record all topics")
     ("size,s", po::value<double>()->default_value(-1),
      "Maximum memory per topic to use in buffering in MB. Default: no limit")
     ("duration,d", po::value<double>()->default_value(30.0),
@@ -115,6 +116,7 @@ bool parseVariablesMap(SnapshotterOptions& opts, po::variables_map const& vm)
   }
   opts.default_memory_limit_ = static_cast<int>(MB_TO_BYTES * vm["size"].as<double>());
   opts.default_duration_limit_ = ros::Duration(vm["duration"].as<double>());
+  opts.all_topics_ = vm.count("all");
   return true;
 }
 
@@ -247,7 +249,7 @@ int main(int argc, char** argv)
   appendParamOptions(private_nh, opts);
 
   // Exit if not topics selected
-  if (!opts.topics_.size())
+  if (!opts.topics_.size() && !opts.all_topics_)
   {
     ROS_FATAL("No topics selected. Exiting.");
     return 1;
