@@ -36,6 +36,7 @@
 
 #include <boost/atomic.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/shared_mutex.hpp>
 #include <ros/ros.h>
 #include <ros/time.h>
 #include <rosbag_snapshot_msgs/TriggerSnapshot.h>
