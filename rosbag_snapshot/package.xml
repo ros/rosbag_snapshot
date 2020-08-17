@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>rosbag_snapshot</name>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <description>The rosbag_snapshot package</description>
   <author email="kma1660+rsp@gmail.com">Kevin Allen</author>
   <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
