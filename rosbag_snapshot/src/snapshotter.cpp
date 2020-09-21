@@ -45,6 +45,7 @@
 #include <topic_tools/shape_shifter.h>
 #include <rosbag_snapshot_msgs/SnapshotStatus.h>
 #include <rosbag_snapshot/snapshotter.h>
+#include <memory>
 #include <utility>
 
 using std::string;

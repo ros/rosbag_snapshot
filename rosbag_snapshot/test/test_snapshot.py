@@ -68,7 +68,7 @@ class TestRosbagSnapshot(unittest.TestCase):
             duration = self.default_duration_limit
             memory = self.default_memory_limit
             if type(topic_obj) == dict:
-                topic = topic_obj.keys()[0]
+                topic = list(topic_obj.keys())[0]
                 duration = topic_obj[topic].get('duration', duration)
                 memory = topic_obj[topic].get('memory', memory)
             else:
@@ -153,7 +153,7 @@ class TestRosbagSnapshot(unittest.TestCase):
         self.assertIsNotNone(self.last_status)  # A message was recieved
         topics = [msg.topic for msg in self.last_status.topics]
         # Oneliners :)
-        status_topics = [rospy.resolve_name(topic.keys()[0] if type(topic) == dict else topic)
+        status_topics = [rospy.resolve_name(list(topic.keys())[0] if type(topic) == dict else topic)
                          for topic in self.params['topics']]
         self.assertEquals(set(topics), set(status_topics))  # Topics from params are same as topics in status message
         for topic in self.last_status.topics:
@@ -176,7 +176,8 @@ class TestRosbagSnapshot(unittest.TestCase):
         for topic in topics_dict:
             size = topics_dict[topic].message_count * 8  # Calculate stored message size as each message is 8 bytes
             gen = bag.read_messages(topics=topic)
-            _, _, first_time = gen.next()
+            _, _, first_time = next(gen)
+            last_time = first_time  # in case the next for loop does not execute
             if start_time:
                 self.assertGreaterEqual(first_time, start_time)
             for _, _, last_time in gen:  # Read through all messages so last_time is valid
