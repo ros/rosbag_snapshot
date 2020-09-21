@@ -68,7 +68,7 @@ class TestRosbagSnapshot(unittest.TestCase):
             duration = self.default_duration_limit
             memory = self.default_memory_limit
             if type(topic_obj) == dict:
-                topic = topic_obj.keys()[0]
+                topic = list(topic_obj.keys())[0]
                 duration = topic_obj[topic].get('duration', duration)
                 memory = topic_obj[topic].get('memory', memory)
             else:
