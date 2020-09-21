@@ -176,7 +176,8 @@ class TestRosbagSnapshot(unittest.TestCase):
         for topic in topics_dict:
             size = topics_dict[topic].message_count * 8  # Calculate stored message size as each message is 8 bytes
             gen = bag.read_messages(topics=topic)
-            _, _, first_time = gen.next()
+            _, _, first_time = next(gen)
+            last_time = first_time  # in case the next for loop does not execute
             if start_time:
                 self.assertGreaterEqual(first_time, start_time)
             for _, _, last_time in gen:  # Read through all messages so last_time is valid
