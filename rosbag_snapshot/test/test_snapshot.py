@@ -153,7 +153,7 @@ class TestRosbagSnapshot(unittest.TestCase):
         self.assertIsNotNone(self.last_status)  # A message was recieved
         topics = [msg.topic for msg in self.last_status.topics]
         # Oneliners :)
-        status_topics = [rospy.resolve_name(topic.keys()[0] if type(topic) == dict else topic)
+        status_topics = [rospy.resolve_name(list(topic.keys())[0] if type(topic) == dict else topic)
                          for topic in self.params['topics']]
         self.assertEquals(set(topics), set(status_topics))  # Topics from params are same as topics in status message
         for topic in self.last_status.topics:
