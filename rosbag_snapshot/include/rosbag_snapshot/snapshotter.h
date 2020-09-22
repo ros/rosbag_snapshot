@@ -101,7 +101,7 @@ struct ROSBAG_DECL SnapshotterOptions
   SnapshotterOptions(ros::Duration default_duration_limit = ros::Duration(30), int32_t default_memory_limit = -1,
                     ros::Duration status_period = ros::Duration(1));
 
-  // Add a new topic to the configuration
+  // Add a new topic to the configuration, returns false if the topic was already present
   bool addTopic(std::string const& topic,
                 ros::Duration duration_limit = SnapshotterTopicOptions::INHERIT_DURATION_LIMIT,
                 int32_t memory_limit = SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT);
