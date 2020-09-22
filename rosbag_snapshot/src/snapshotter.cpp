@@ -530,6 +530,10 @@ void Snapshotter::pollTopics(ros::TimerEvent const& e, rosbag_snapshot::Snapshot
       }
     }
   }
+  else
+  {
+    ROS_WARN_THROTTLE(5, "Failed to get topics from the ROS master");
+  }
 }
 
 int Snapshotter::run()
