@@ -14,5 +14,5 @@ time stop_time    # Latest timestamp for a message to be included in written bag
 
 bool success    # True if snapshot successfully written to disk
 
-string NO_DATA=no messages buffered on selected topics
+string NO_DATA_MESSAGE=no messages buffered on selected topics
 string message  # Error description if failed

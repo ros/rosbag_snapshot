@@ -428,7 +428,7 @@ bool Snapshotter::triggerSnapshotCb(rosbag_snapshot_msgs::TriggerSnapshot::Reque
   if (!bag.isOpen())
   {
     res.success = false;
-    res.message = res.NO_DATA;
+    res.message = res.NO_DATA_MESSAGE;
     return true;
   }
 
