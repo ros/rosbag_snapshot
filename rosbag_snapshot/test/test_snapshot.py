@@ -90,7 +90,7 @@ class TestRosbagSnapshot(unittest.TestCase):
         filename = tempfile.mktemp()
         res = self.trigger(filename=filename, topics=topics)
         self.assertFalse(res.success)
-        self.assertEqual(res.message, TriggerSnapshotResponse.NO_DATA)
+        self.assertEqual(res.message, TriggerSnapshotResponse.NO_DATA_MESSAGE)
         self.assertFalse(os.path.isfile(filename))
 
     def _assert_record_success(self, data):
