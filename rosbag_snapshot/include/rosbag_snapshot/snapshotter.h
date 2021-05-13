@@ -158,6 +158,9 @@ public:
   // Get a begin and end iterator into the buffer respecting the start and end timestamp constraints
   range_t rangeFromTimes(ros::Time const& start, ros::Time const& end);
 
+  // Return the total message size including the meta-information
+  int64_t getMessageSize(SnapshotMessage const& msg) const;
+
 private:
   // Internal push whitch does not obtain lock
   void _push(SnapshotMessage const& msg);

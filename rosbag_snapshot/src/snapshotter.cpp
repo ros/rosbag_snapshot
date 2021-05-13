@@ -180,6 +180,17 @@ SnapshotMessage MessageQueue::pop()
   boost::mutex::scoped_lock l(lock);
   return _pop();
 }
+
+int64_t MessageQueue::getMessageSize(SnapshotMessage const& snapshot_msg) const
+{
+  return snapshot_msg.msg->size() +
+         snapshot_msg.connection_header->size() +
+         snapshot_msg.msg->getDataType().size() +
+         snapshot_msg.msg->getMD5Sum().size() +
+         snapshot_msg.msg->getMessageDefinition().size() +
+         sizeof(SnapshotMessage);
+}
+
 void MessageQueue::_push(SnapshotMessage const& _out)
 {
   int32_t size = _out.msg->size();
@@ -188,7 +199,7 @@ void MessageQueue::_push(SnapshotMessage const& _out)
     return;
   queue_.push_back(_out);
   // Add size of new message to running count to maintain correctness
-  size_ += _out.msg->size();
+  size_ += getMessageSize(_out);
 }
 
 SnapshotMessage MessageQueue::_pop()
@@ -196,7 +207,7 @@ SnapshotMessage MessageQueue::_pop()
   SnapshotMessage tmp = queue_.front();
   queue_.pop_front();
   //  Remove size of popped message to maintain correctness of size_
-  size_ -= tmp.msg->size();
+  size_ -= getMessageSize(tmp);
   return tmp;
 }
 
