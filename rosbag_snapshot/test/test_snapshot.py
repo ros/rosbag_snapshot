@@ -47,6 +47,7 @@ class TestRosbagSnapshot(unittest.TestCase):
     Tests the "rosbag_snapshot" command.
     Relies on the nodes launched in snapshot.test
     '''
+
     def __init__(self, *args):
         self.params = rospy.get_param("snapshot")
         self._parse_params(self.params)
@@ -64,19 +65,22 @@ class TestRosbagSnapshot(unittest.TestCase):
         self.topic_limits = {}
         self.default_duration_limit = params['default_duration_limit']
         self.default_memory_limit = params['default_memory_limit']
+        self.default_count_limit = params['default_count_limit']
         for topic_obj in self.params['topics']:
             duration = self.default_duration_limit
             memory = self.default_memory_limit
+            count = self.default_count_limit
             if type(topic_obj) == dict:
                 topic = list(topic_obj.keys())[0]
                 duration = topic_obj[topic].get('duration', duration)
                 memory = topic_obj[topic].get('memory', memory)
+                count = topic_obj[topic].get('count', count)
             else:
                 topic = topic_obj
             topic = rospy.resolve_name(topic)
             duration = rospy.Duration(duration)
             memory = 1E6 * memory
-            self.topic_limits[topic] = (duration, memory)
+            self.topic_limits[topic] = (duration, memory, count)
 
     def _status_cb(self, msg):
         self.last_status = msg
@@ -130,12 +134,13 @@ class TestRosbagSnapshot(unittest.TestCase):
         self.assertTrue(os.path.isfile(filename))
         return filename
 
-    def _assert_limits_enforced(self, test_topic, duration, memory):
+    def _assert_limits_enforced(self, test_topic, duration, memory, count):
         '''
         Asserts that the measured duration and memory for a topic comply with the launch parameters
         @param topic: string
         @param duration: rospy.Duration, age of buffer
         @param memory: integer, bytes of memory used
+        @param count: integer, number of messages stored
         '''
         test_topic = rospy.resolve_name(test_topic)
         self.assertIn(test_topic, self.topic_limits)
@@ -144,6 +149,8 @@ class TestRosbagSnapshot(unittest.TestCase):
             self.assertLessEqual(duration, limits[0])
         if limits[1] > 0:
             self.assertLessEqual(memory, limits[1])
+        if limits[2] > 0:
+            self.assertLessEqual(count, limits[2])
 
     def _assert_status_valid(self):
         '''
@@ -159,7 +166,8 @@ class TestRosbagSnapshot(unittest.TestCase):
         for topic in self.last_status.topics:
             duration = topic.window_stop - topic.window_start
             memory = topic.traffic
-            self._assert_limits_enforced(topic.topic, duration, memory)
+            count = topic.delivered_msgs
+            self._assert_limits_enforced(topic.topic, duration, memory, count)
 
     def _assert_bag_valid(self, filename, topics=None, start_time=None, stop_time=None):
         '''
@@ -175,6 +183,7 @@ class TestRosbagSnapshot(unittest.TestCase):
         self.assertTrue(bag_topics.issubset(param_topics))
         for topic in topics_dict:
             size = topics_dict[topic].message_count * 8  # Calculate stored message size as each message is 8 bytes
+            count = topics_dict[topic].message_count
             gen = bag.read_messages(topics=topic)
             _, _, first_time = next(gen)
             last_time = first_time  # in case the next for loop does not execute
@@ -185,7 +194,7 @@ class TestRosbagSnapshot(unittest.TestCase):
             if stop_time:
                 self.assertLessEqual(last_time, stop_time)
             duration = last_time - first_time
-            self._assert_limits_enforced(topic, duration, size)
+            self._assert_limits_enforced(topic, duration, size, count)
 
     def test_1_service_connects(self):
         '''
@@ -240,7 +249,7 @@ class TestRosbagSnapshot(unittest.TestCase):
         Test that an invalid topic or one not subscribed to fails
         '''
         self._assert_no_data(['_invalid_graph_name'])
-        self._assert_no_data(['/test4'])
+        self._assert_no_data(['/test5'])
 
 
 if __name__ == '__main__':

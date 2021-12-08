@@ -56,26 +56,30 @@ namespace rosbag_snapshot
 {
 const ros::Duration SnapshotterTopicOptions::NO_DURATION_LIMIT = ros::Duration(-1);
 const int32_t SnapshotterTopicOptions::NO_MEMORY_LIMIT = -1;
+const int32_t SnapshotterTopicOptions::NO_COUNT_LIMIT = -1;
 const ros::Duration SnapshotterTopicOptions::INHERIT_DURATION_LIMIT = ros::Duration(0);
 const int32_t SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT = 0;
+const int32_t SnapshotterTopicOptions::INHERIT_COUNT_LIMIT = 0;
 
-SnapshotterTopicOptions::SnapshotterTopicOptions(ros::Duration duration_limit, int32_t memory_limit)
-  : duration_limit_(duration_limit), memory_limit_(memory_limit)
+SnapshotterTopicOptions::SnapshotterTopicOptions(ros::Duration duration_limit, int32_t memory_limit,
+                                                 int32_t count_limit)
+  : duration_limit_(duration_limit), memory_limit_(memory_limit), count_limit_(count_limit)
 {
 }
 
 SnapshotterOptions::SnapshotterOptions(ros::Duration default_duration_limit, int32_t default_memory_limit,
-                                     ros::Duration status_period)
+                                     int32_t default_count_limit, ros::Duration status_period)
   : default_duration_limit_(default_duration_limit)
   , default_memory_limit_(default_memory_limit)
+  , default_count_limit_(default_count_limit)
   , status_period_(status_period)
   , topics_()
 {
 }
 
-bool SnapshotterOptions::addTopic(std::string const& topic, ros::Duration duration, int32_t memory)
+bool SnapshotterOptions::addTopic(std::string const& topic, ros::Duration duration, int32_t memory, int32_t count)
 {
-  SnapshotterTopicOptions ops(duration, memory);
+  SnapshotterTopicOptions ops(duration, memory, count);
   std::pair<topics_t::iterator, bool> ret;
   ret = topics_.insert(topics_t::value_type(topic, ops));
   return ret.second;
@@ -162,6 +166,12 @@ bool MessageQueue::preparePush(int32_t size, ros::Time const& time)
       dt = time - queue_.front().time;
     }
   }
+
+  // If count limit is enforced, remove elements from front of queue until the the count is below the limit
+  if (options_.count_limit_ > SnapshotterTopicOptions::NO_COUNT_LIMIT && queue_.size() != 0)
+    while (queue_.size() != 0 && queue_.size() >= options_.count_limit_)
+      _pop();
+
   return true;
 }
 void MessageQueue::push(SnapshotMessage const& _out)
@@ -253,6 +263,8 @@ void Snapshotter::fixTopicOptions(SnapshotterTopicOptions& options)
     options.duration_limit_ = options_.default_duration_limit_;
   if (options.memory_limit_ == SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT)
     options.memory_limit_ = options_.default_memory_limit_;
+  if (options.count_limit_ == SnapshotterTopicOptions::INHERIT_COUNT_LIMIT)
+    options.count_limit_ = options_.default_memory_limit_;
 }
 
 bool Snapshotter::postfixFilename(string& file)
