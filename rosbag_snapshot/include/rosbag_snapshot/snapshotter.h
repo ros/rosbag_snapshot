@@ -66,18 +66,24 @@ struct ROSBAG_DECL SnapshotterTopicOptions
   static const ros::Duration NO_DURATION_LIMIT;
   // When the value of memory_limit_, do not trunctate the buffer no matter how much memory it consumes (DANGROUS)
   static const int32_t NO_MEMORY_LIMIT;
+  // When the value of count_limit_, do not trunctate the buffer no matter how many message it consumes
+  static const int32_t NO_COUNT_LIMIT;
   // When the value of duration_limit_, inherit the limit from the node's configured default
   static const ros::Duration INHERIT_DURATION_LIMIT;
   // When the value of memory_limit_, inherit the limit from the node's configured default
   static const int32_t INHERIT_MEMORY_LIMIT;
+  // When the value of count_limit_, inherit the limit from the node's configured default
+  static const int32_t INHERIT_COUNT_LIMIT;
 
   // Maximum difference in time from newest and oldest message in buffer before older messages are removed
   ros::Duration duration_limit_;
   // Maximum memory usage of the buffer before older messages are removed
   int32_t memory_limit_;
+  // Maximum number of message in the buffer before older messages are removed
+  int32_t count_limit_;
 
   SnapshotterTopicOptions(ros::Duration duration_limit = INHERIT_DURATION_LIMIT,
-                         int32_t memory_limit = INHERIT_MEMORY_LIMIT);
+                          int32_t memory_limit = INHERIT_MEMORY_LIMIT, int32_t count_limit = INHERIT_COUNT_LIMIT);
 };
 
 /* Configuration for the Snapshotter node. Contains default limits for memory and duration
@@ -89,6 +95,8 @@ struct ROSBAG_DECL SnapshotterOptions
   ros::Duration default_duration_limit_;
   // Memory limit to use for a topic's buffer if one is not specified
   int32_t default_memory_limit_;
+  // Count limit to use for a topic's buffer if one is not specified
+  int32_t default_count_limit_;
   // Period between publishing topic status messages. If <= ros::Duration(0), don't publish status
   ros::Duration status_period_;
   // Flag if all topics should be recorded
@@ -99,12 +107,13 @@ struct ROSBAG_DECL SnapshotterOptions
   topics_t topics_;
 
   SnapshotterOptions(ros::Duration default_duration_limit = ros::Duration(30), int32_t default_memory_limit = -1,
-                    ros::Duration status_period = ros::Duration(1));
+                     int32_t default_count_limit = -1, ros::Duration status_period = ros::Duration(1));
 
   // Add a new topic to the configuration, returns false if the topic was already present
   bool addTopic(std::string const& topic,
                 ros::Duration duration_limit = SnapshotterTopicOptions::INHERIT_DURATION_LIMIT,
-                int32_t memory_limit = SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT);
+                int32_t memory_limit = SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT,
+                int32_t count_limit = SnapshotterTopicOptions::INHERIT_COUNT_LIMIT);
 };
 
 /* Stores a buffered message of an ambiguous type and it's associated metadata (time of arrival, connection data),

@@ -70,6 +70,8 @@ bool parseOptions(po::variables_map& vm, int argc, char** argv)
     ("all,a", "Record all topics")
     ("size,s", po::value<double>()->default_value(-1),
      "Maximum memory per topic to use in buffering in MB. Default: no limit")
+    ("count,c", po::value<int32_t>()->default_value(-1),
+     "Maximum number of messages per topic to use when buffering. Default: no limit")
     ("duration,d", po::value<double>()->default_value(30.0),
      "Maximum difference between newest and oldest buffered message per topic in seconds. Default: 30")
     ("output-prefix,o", po::value<std::string>()->default_value(""),
@@ -116,6 +118,7 @@ bool parseVariablesMap(SnapshotterOptions& opts, po::variables_map const& vm)
   }
   opts.default_memory_limit_ = static_cast<int>(MB_TO_BYTES * vm["size"].as<double>());
   opts.default_duration_limit_ = ros::Duration(vm["duration"].as<double>());
+  opts.default_count_limit_ =  vm["count"].as<int32_t>();
   opts.all_topics_ = vm.count("all");
   return true;
 }
@@ -150,10 +153,13 @@ void appendParamOptions(ros::NodeHandle& nh, SnapshotterOptions& opts)
 
   // Override program options for default limits if the parameters are set.
   double tmp;
+  int32_t default_count;
   if (nh.getParam("default_memory_limit", tmp))
     opts.default_memory_limit_ = static_cast<int>(MB_TO_BYTES * tmp);
   if (nh.getParam("default_duration_limit", tmp))
     opts.default_duration_limit_ = ros::Duration(tmp);
+  if (nh.getParam("default_count_limit", default_count))
+    opts.default_count_limit_ = default_count;
   nh.param("record_all_topics", opts.all_topics_, opts.all_topics_);
 
   if (!nh.getParam("topics", topics))
@@ -181,8 +187,10 @@ void appendParamOptions(ros::NodeHandle& nh, SnapshotterOptions& opts)
 
       ros::Duration dur = SnapshotterTopicOptions::INHERIT_DURATION_LIMIT;
       int64_t mem = SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT;
+      int32_t cnt = SnapshotterTopicOptions::INHERIT_COUNT_LIMIT;
       std::string duration = "duration";
       std::string memory = "memory";
+      std::string count = "count";
       if (topic_config.hasMember(duration))
       {
         XmlRpcValue& dur_limit = topic_config[duration];
@@ -215,7 +223,17 @@ void appendParamOptions(ros::NodeHandle& nh, SnapshotterOptions& opts)
         else
           ROS_FATAL("err");
       }
-      opts.addTopic(topic, dur, mem);
+      if (topic_config.hasMember("count"))
+      {
+        XmlRpcValue& cnt_limit = topic_config[count];
+        if (cnt_limit.getType() == XmlRpcValue::TypeInt)
+        {
+          cnt = cnt_limit;
+        }
+        else
+          ROS_FATAL("err");
+      }
+      opts.addTopic(topic, dur, mem, cnt);
     }
     else
       ROS_ASSERT_MSG(false, "Parameter invalid for topic %lu", i);
