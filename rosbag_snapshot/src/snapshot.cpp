@@ -68,6 +68,7 @@ bool parseOptions(po::variables_map& vm, int argc, char** argv)
     ("pause,p", "Stop buffering new messages until resumed or write is triggered")
     ("resume,r", "Resume buffering new messages, writing over older messages as needed")
     ("all,a", "Record all topics")
+    ("no-clear,n", "Flag to explicitly NOT clear the buffer after writing to a bag.")
     ("size,s", po::value<double>()->default_value(-1),
      "Maximum memory per topic to use in buffering in MB. Default: no limit")
     ("count,c", po::value<int32_t>()->default_value(-1),
@@ -119,6 +120,10 @@ bool parseVariablesMap(SnapshotterOptions& opts, po::variables_map const& vm)
   opts.default_memory_limit_ = static_cast<int>(MB_TO_BYTES * vm["size"].as<double>());
   opts.default_duration_limit_ = ros::Duration(vm["duration"].as<double>());
   opts.default_count_limit_ =  vm["count"].as<int32_t>();
+  if (vm.count("no-clear"))
+  {
+    opts.clear_buffer_ = false;
+  } else opts.clear_buffer_ = true;
   opts.all_topics_ = vm.count("all");
   return true;
 }
@@ -154,12 +159,15 @@ void appendParamOptions(ros::NodeHandle& nh, SnapshotterOptions& opts)
   // Override program options for default limits if the parameters are set.
   double tmp;
   int32_t default_count;
+  bool clear_buffer;
   if (nh.getParam("default_memory_limit", tmp))
     opts.default_memory_limit_ = static_cast<int>(MB_TO_BYTES * tmp);
   if (nh.getParam("default_duration_limit", tmp))
     opts.default_duration_limit_ = ros::Duration(tmp);
   if (nh.getParam("default_count_limit", default_count))
     opts.default_count_limit_ = default_count;
+  if (nh.getParam("clear_buffer", clear_buffer))
+    opts.clear_buffer_ = clear_buffer;
   nh.param("record_all_topics", opts.all_topics_, opts.all_topics_);
 
   if (!nh.getParam("topics", topics))

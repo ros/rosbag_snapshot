@@ -68,11 +68,12 @@ SnapshotterTopicOptions::SnapshotterTopicOptions(ros::Duration duration_limit, i
 }
 
 SnapshotterOptions::SnapshotterOptions(ros::Duration default_duration_limit, int32_t default_memory_limit,
-                                     int32_t default_count_limit, ros::Duration status_period)
+                                     int32_t default_count_limit, ros::Duration status_period, bool clear_buffer)
   : default_duration_limit_(default_duration_limit)
   , default_memory_limit_(default_memory_limit)
   , default_count_limit_(default_count_limit)
   , status_period_(status_period)
+  , clear_buffer_(clear_buffer)
   , topics_()
 {
 }
@@ -475,9 +476,13 @@ void Snapshotter::pause()
 
 void Snapshotter::resume()
 {
-  clear();
+  if (options_.clear_buffer_)
+  {
+    clear();
+    ROS_INFO("Old data cleared");
+  }
   recording_ = true;
-  ROS_INFO("Buffering resumed and old data cleared.");
+  ROS_INFO("Buffering resumed");
 }
 
 bool Snapshotter::enableCB(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res)

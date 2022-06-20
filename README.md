@@ -24,6 +24,8 @@ Options:
                                write is triggered
   -r [ --resume ]              Resume buffering new messages, writing over
                                older messages as needed
+  -n [ --no-clear ]            Flag to explicitly NOT clear buffer after writing
+                               to a bag file (no tag will clear buffer)
   -s [ --size ] arg (=-1)      Maximum memory per topic to use in buffering in
                                MB. Default: no limit
   -d [ --duration ] arg (=30)  Maximum difference between newest and oldest
@@ -51,6 +53,7 @@ Options:
     <rosparam>
         default_duration_limit: 1  # Maximum time difference between newest and oldest message, seconds, overrides -d flag
         default_memory_limit: 0.1  # Maximum memory used by messages in each topic's buffer, MB, override -s flag
+        clear_buffer: false        # No option / true will clear the buffer after writing to bag. False will not clear buffer
         topics:
             - test1                # Inherit defaults
             - test2:               # Override duration limit, inherit memory limit
