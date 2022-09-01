@@ -123,7 +123,8 @@ bool parseVariablesMap(SnapshotterOptions& opts, po::variables_map const& vm)
   if (vm.count("no-clear"))
   {
     opts.clear_buffer_ = false;
-  } else opts.clear_buffer_ = true;
+  }
+  else opts.clear_buffer_ = true;
   opts.all_topics_ = vm.count("all");
   return true;
 }
