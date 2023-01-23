@@ -585,7 +585,9 @@ int Snapshotter::run()
 
   // Start timer to poll ROS master for topics
   if (options_.all_topics_)
-    poll_topic_timer_ = nh_.createTimer(ros::Duration(1.0), boost::bind(&Snapshotter::pollTopics, this, boost::placeholders::_1, &options_));
+    poll_topic_timer_ = nh_.createTimer(ros::Duration(1.0),
+                                        boost::bind(&Snapshotter::pollTopics, this,
+                                                    boost::placeholders::_1, &options_));
 
   // Use multiple callback threads
   ros::MultiThreadedSpinner spinner(4);  // Use 4 threads
