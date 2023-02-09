@@ -101,6 +101,8 @@ struct ROSBAG_DECL SnapshotterOptions
   ros::Duration status_period_;
   // Flag if all topics should be recorded
   bool all_topics_;
+  // Compression type
+  std::string compression_;
 
   typedef std::map<std::string, SnapshotterTopicOptions> topics_t;
   // Provides list of topics to snapshot and their limit configurations
