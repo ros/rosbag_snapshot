@@ -79,7 +79,7 @@ bool parseOptions(po::variables_map& vm, int argc, char** argv)
     ("output-filename,O", po::value<std::string>(), "When in trigger write mode, exact name of written bag file")
     ("topic", po::value<std::vector<std::string> >(),
      "Topic to buffer. If triggering write, write only these topics instead of all buffered topics.")
-    ("compression,c", po::value<std::string>(),
+    ("compression,c", po::value<std::string>()->default_value("uncompressed"),
      "Bag compression type. Default: uncompressed. Other options are: BZ2, LZ4.");
   // clang-format on
   po::positional_options_description p;
@@ -122,8 +122,7 @@ bool parseVariablesMap(SnapshotterOptions& opts, po::variables_map const& vm)
   opts.default_duration_limit_ = ros::Duration(vm["duration"].as<double>());
   opts.default_count_limit_ =  vm["count"].as<int32_t>();
   opts.all_topics_ = vm.count("all");
-  if (vm.count("compression"))
-    opts.compression_ = vm["compression"].as<std::string>();
+  opts.compression_ = vm["compression"].as<std::string>();
   return true;
 }
 
