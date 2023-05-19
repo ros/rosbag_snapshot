@@ -43,6 +43,7 @@
 #include <ros/ros.h>
 #include <ros/assert.h>
 #include <topic_tools/shape_shifter.h>
+#include <rosbag/stream.h>
 #include <rosbag_snapshot_msgs/SnapshotStatus.h>
 #include <rosbag_snapshot/snapshotter.h>
 #include <memory>
@@ -347,6 +348,22 @@ bool Snapshotter::writeTopic(rosbag::Bag& bag, MessageQueue& message_queue, stri
       return false;
     }
     ROS_INFO("Writing snapshot to %s", req.filename.c_str());
+
+    // Setting compression type
+    if (options_.compression_ == "LZ4")
+    {
+      ROS_INFO("Bag compression type LZ4");
+      bag.setCompression(rosbag::compression::LZ4);
+    }
+    else if (options_.compression_ == "BZ2")
+    {
+      ROS_INFO("Bag compression type BZ2");
+      bag.setCompression(rosbag::compression::BZ2);
+    }
+    else
+    {
+      bag.setCompression(rosbag::compression::Uncompressed);
+    }
   }
 
   // write queue
