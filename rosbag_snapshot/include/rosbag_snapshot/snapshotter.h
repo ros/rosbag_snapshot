@@ -103,6 +103,8 @@ struct ROSBAG_DECL SnapshotterOptions
   bool all_topics_;
   // Flag for clearing buffers or not after writing to bag
   bool clear_buffer_;
+  // Compression type
+  std::string compression_;
 
   typedef std::map<std::string, SnapshotterTopicOptions> topics_t;
   // Provides list of topics to snapshot and their limit configurations

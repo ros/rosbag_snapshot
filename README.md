@@ -19,7 +19,7 @@ Buffer recent messages until triggered to write or trigger an already running in
 
 Options:
   -h [ --help ]                produce help message
-  -t [ --trigger-write ]       Write buffer of selected topcis to a bag file
+  -t [ --trigger-write ]       Write buffer of selected topics to a bag file
   -p [ --pause ]               Stop buffering new messages until resumed or
                                write is triggered
   -r [ --resume ]              Resume buffering new messages, writing over
@@ -32,11 +32,13 @@ Options:
                                buffered message per topic in seconds. Default:
                                30
   -o [ --output-prefix ] arg   When in trigger write mode, prepend PREFIX to
-                               name of writting bag file
+                               name of writing bag file
   -O [ --output-filename ] arg When in trigger write mode, exact name of
                                written bag file
   --topic arg                  Topic to buffer. If triggering write, write only
                                these topics instead of all buffered topics.
+  -c [ --compression ] arg     Compression type. Options are: LZ4, BZ2.
+                               Default: uncompressed.
 ```
 
 ###### Hold a buffer of the last 30 seconds of data from selected topics until triggered to write
@@ -54,6 +56,7 @@ Options:
         default_duration_limit: 1  # Maximum time difference between newest and oldest message, seconds, overrides -d flag
         default_memory_limit: 0.1  # Maximum memory used by messages in each topic's buffer, MB, override -s flag
         clear_buffer: false        # No option / true will clear the buffer after writing to bag. False will not clear buffer
+        compression: LZ4           # LZ4, BZ2, uncompressed
         topics:
             - test1                # Inherit defaults
             - test2:               # Override duration limit, inherit memory limit

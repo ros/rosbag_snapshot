@@ -43,6 +43,7 @@
 #include <ros/ros.h>
 #include <ros/assert.h>
 #include <topic_tools/shape_shifter.h>
+#include <rosbag/stream.h>
 #include <rosbag_snapshot_msgs/SnapshotStatus.h>
 #include <rosbag_snapshot/snapshotter.h>
 #include <memory>
@@ -320,7 +321,7 @@ void Snapshotter::subscribe(string const& topic, boost::shared_ptr<MessageQueue>
   ops.datatype = ros::message_traits::datatype<topic_tools::ShapeShifter>();
   ops.helper =
       boost::make_shared<ros::SubscriptionCallbackHelperT<const ros::MessageEvent<topic_tools::ShapeShifter const>&> >(
-          boost::bind(&Snapshotter::topicCB, this, _1, queue));
+          boost::bind(&Snapshotter::topicCB, this, boost::placeholders::_1, queue));
   *sub = nh_.subscribe(ops);
   queue->setSubscriber(sub);
 }
@@ -348,6 +349,22 @@ bool Snapshotter::writeTopic(rosbag::Bag& bag, MessageQueue& message_queue, stri
       return false;
     }
     ROS_INFO("Writing snapshot to %s", req.filename.c_str());
+
+    // Setting compression type
+    if (options_.compression_ == "LZ4")
+    {
+      ROS_INFO("Bag compression type LZ4");
+      bag.setCompression(rosbag::compression::LZ4);
+    }
+    else if (options_.compression_ == "BZ2")
+    {
+      ROS_INFO("Bag compression type BZ2");
+      bag.setCompression(rosbag::compression::BZ2);
+    }
+    else
+    {
+      bag.setCompression(rosbag::compression::Uncompressed);
+    }
   }
 
   // write queue
@@ -590,7 +607,9 @@ int Snapshotter::run()
 
   // Start timer to poll ROS master for topics
   if (options_.all_topics_)
-    poll_topic_timer_ = nh_.createTimer(ros::Duration(1.0), boost::bind(&Snapshotter::pollTopics, this, _1, &options_));
+    poll_topic_timer_ = nh_.createTimer(ros::Duration(1.0),
+                                        boost::bind(&Snapshotter::pollTopics, this,
+                                                    boost::placeholders::_1, &options_));
 
   // Use multiple callback threads
   ros::MultiThreadedSpinner spinner(4);  // Use 4 threads
