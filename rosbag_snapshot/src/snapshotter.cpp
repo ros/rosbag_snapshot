@@ -118,6 +118,14 @@ bool SnapshotterOptions::addTopicOrPattern(std::string const& topic_or_pattern,
     return addTopic(topic_or_pattern, duration, memory, count);
 }
 
+SnapshotterTopicPatternConstPtr SnapshotterOptions::findFirstMatchingPattern(const std::string &topic)
+{
+  for (const auto& pattern : patterns_)
+    if (pattern->matches(topic))
+      return pattern;
+  return nullptr;
+}
+
 SnapshotterTopicPattern::SnapshotterTopicPattern(const std::string &pattern,
                                                  const SnapshotterTopicOptions &topic_options)
   : pattern_(pattern)
@@ -615,6 +623,14 @@ void Snapshotter::pollTopics(ros::TimerEvent const& e, rosbag_snapshot::Snapshot
     for (ros::master::TopicInfo const& t : topics)
     {
       std::string topic = t.name;
+      SnapshotterTopicOptions topic_options;
+      if (!options->all_topics_)
+      {
+        SnapshotterTopicPatternConstPtr matching_topic_pattern = options->findFirstMatchingPattern(topic);
+        if (matching_topic_pattern == nullptr)
+          continue;
+        topic_options = matching_topic_pattern->get_topic_options();
+      }
       if (options->addTopic(topic))
       {
         SnapshotterTopicOptions topic_options;
@@ -659,10 +675,9 @@ int Snapshotter::run()
     status_timer_ = nh_.createTimer(options_.status_period_, &Snapshotter::publishStatus, this);
 
   // Start timer to poll ROS master for topics
-  if (options_.all_topics_)
-    poll_topic_timer_ = nh_.createTimer(ros::Duration(1.0),
-                                        boost::bind(&Snapshotter::pollTopics, this,
-                                                    boost::placeholders::_1, &options_));
+  poll_topic_timer_ = nh_.createTimer(ros::Duration(1.0),
+                                      boost::bind(&Snapshotter::pollTopics, this,
+                                                  boost::placeholders::_1, &options_));
 
   // Use multiple callback threads
   ros::MultiThreadedSpinner spinner(4);  // Use 4 threads

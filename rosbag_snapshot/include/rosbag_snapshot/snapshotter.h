@@ -158,6 +158,8 @@ struct ROSBAG_DECL SnapshotterOptions
                          int32_t memory_limit = SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT,
                          int32_t count_limit = SnapshotterTopicOptions::INHERIT_COUNT_LIMIT);
 
+  // Return the first matching topic pattern that matches the given topic, otherwise null.
+  SnapshotterTopicPatternConstPtr findFirstMatchingPattern(const std::string &topic);
 };
 
 /* Stores a buffered message of an ambiguous type and it's associated metadata (time of arrival, connection data),
