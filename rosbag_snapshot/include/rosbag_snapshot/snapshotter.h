@@ -51,6 +51,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <memory>
+#include <regex>
 
 namespace rosbag_snapshot
 {
@@ -85,6 +87,27 @@ struct ROSBAG_DECL SnapshotterTopicOptions
   SnapshotterTopicOptions(ros::Duration duration_limit = INHERIT_DURATION_LIMIT,
                           int32_t memory_limit = INHERIT_MEMORY_LIMIT, int32_t count_limit = INHERIT_COUNT_LIMIT);
 };
+
+/* Regular expression matching fully qualified topic names that should be tracked.
+ */
+class ROSBAG_DECL SnapshotterTopicPattern
+{
+  public:
+  SnapshotterTopicPattern(const std::string &pattern, const SnapshotterTopicOptions &topic_options);
+
+  const std::regex& get_pattern() const;
+  const SnapshotterTopicOptions& get_topic_options() const;
+
+  // Return true if pattern matches the given topic name exactly.
+  bool matches(const std::string &topic) const;
+
+  private:
+  // Maximum difference in time from newest and oldest message in buffer before older messages are removed
+  std::regex pattern_;
+  SnapshotterTopicOptions topic_options_;
+};
+typedef std::shared_ptr<SnapshotterTopicPattern> SnapshotterTopicPatternPtr;
+typedef std::shared_ptr<const SnapshotterTopicPattern> SnapshotterTopicPatternConstPtr;
 
 /* Configuration for the Snapshotter node. Contains default limits for memory and duration
  * and a map of topics to their limits which may override the defaults.

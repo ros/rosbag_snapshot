@@ -87,6 +87,28 @@ bool SnapshotterOptions::addTopic(std::string const& topic, ros::Duration durati
   return ret.second;
 }
 
+SnapshotterTopicPattern::SnapshotterTopicPattern(const std::string &pattern,
+                                                 const SnapshotterTopicOptions &topic_options)
+  : pattern_(pattern)
+  , topic_options_(topic_options)
+{
+}
+
+const std::regex& SnapshotterTopicPattern::get_pattern() const
+{
+  return pattern_;
+}
+
+const SnapshotterTopicOptions& SnapshotterTopicPattern::get_topic_options() const
+{
+  return topic_options_;
+}
+
+bool SnapshotterTopicPattern::matches(const std::string &topic) const
+{
+  return std::regex_match(topic, pattern_);
+}
+
 SnapshotterClientOptions::SnapshotterClientOptions() : action_(SnapshotterClientOptions::TRIGGER_WRITE)
 {
 }
