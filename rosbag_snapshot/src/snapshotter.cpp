@@ -62,6 +62,11 @@ const ros::Duration SnapshotterTopicOptions::INHERIT_DURATION_LIMIT = ros::Durat
 const int32_t SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT = 0;
 const int32_t SnapshotterTopicOptions::INHERIT_COUNT_LIMIT = 0;
 
+static bool is_topic_name_pattern(const std::string& s)
+{
+  return s.find_first_of(".*+?()[]{}\\") != std::string::npos;
+}
+
 SnapshotterTopicOptions::SnapshotterTopicOptions(ros::Duration duration_limit, int32_t memory_limit,
                                                  int32_t count_limit)
   : duration_limit_(duration_limit), memory_limit_(memory_limit), count_limit_(count_limit)
@@ -76,6 +81,7 @@ SnapshotterOptions::SnapshotterOptions(ros::Duration default_duration_limit, int
   , status_period_(status_period)
   , clear_buffer_(clear_buffer)
   , topics_()
+  , patterns_()
 {
 }
 
@@ -85,6 +91,31 @@ bool SnapshotterOptions::addTopic(std::string const& topic, ros::Duration durati
   std::pair<topics_t::iterator, bool> ret;
   ret = topics_.insert(topics_t::value_type(topic, ops));
   return ret.second;
+}
+
+bool SnapshotterOptions::addPattern(std::string const& pattern, ros::Duration duration, int32_t memory, int32_t count)
+{
+  SnapshotterTopicOptions ops(duration, memory, count);
+  try
+  {
+    patterns_.emplace_back(std::make_shared<SnapshotterTopicPattern>(pattern, ops));
+    ROS_INFO("Added topic pattern: %s", pattern.c_str());
+    return true;
+  }
+  catch (std::regex_error& e)
+  {
+    ROS_ERROR("Invalid topic pattern '%s': %s", pattern.c_str(), e.what());
+    return false;
+  }
+}
+
+bool SnapshotterOptions::addTopicOrPattern(std::string const& topic_or_pattern,
+                                           ros::Duration duration, int32_t memory, int32_t count)
+{
+  if (is_topic_name_pattern(topic_or_pattern))
+    return addPattern(topic_or_pattern, duration, memory, count);
+  else
+    return addTopic(topic_or_pattern, duration, memory, count);
 }
 
 SnapshotterTopicPattern::SnapshotterTopicPattern(const std::string &pattern,

@@ -133,6 +133,10 @@ struct ROSBAG_DECL SnapshotterOptions
   // Provides list of topics to snapshot and their limit configurations
   topics_t topics_;
 
+  typedef std::vector<SnapshotterTopicPatternConstPtr> patterns_t;
+  // List of regexs that match topics which should be tracked by the recorder.
+  patterns_t patterns_;
+
   SnapshotterOptions(ros::Duration default_duration_limit = ros::Duration(30), int32_t default_memory_limit = -1,
                      int32_t default_count_limit = -1, ros::Duration status_period = ros::Duration(1),
                      bool clear_buffer = true);
@@ -142,6 +146,18 @@ struct ROSBAG_DECL SnapshotterOptions
                 ros::Duration duration_limit = SnapshotterTopicOptions::INHERIT_DURATION_LIMIT,
                 int32_t memory_limit = SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT,
                 int32_t count_limit = SnapshotterTopicOptions::INHERIT_COUNT_LIMIT);
+  // Add a new topic pattern to the configuration, returns false if the pattern is invalid
+  bool addPattern(std::string const& pattern,
+                  ros::Duration duration_limit = SnapshotterTopicOptions::INHERIT_DURATION_LIMIT,
+                  int32_t memory_limit = SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT,
+                  int32_t count_limit = SnapshotterTopicOptions::INHERIT_COUNT_LIMIT);
+
+  // Add a new topic or topic pattern to the configuration, returns false if the topic was already present
+  bool addTopicOrPattern(std::string const& topic_or_pattern,
+                         ros::Duration duration_limit = SnapshotterTopicOptions::INHERIT_DURATION_LIMIT,
+                         int32_t memory_limit = SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT,
+                         int32_t count_limit = SnapshotterTopicOptions::INHERIT_COUNT_LIMIT);
+
 };
 
 /* Stores a buffered message of an ambiguous type and it's associated metadata (time of arrival, connection data),
