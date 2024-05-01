@@ -116,7 +116,7 @@ bool parseVariablesMap(SnapshotterOptions& opts, po::variables_map const& vm)
     std::vector<std::string> topics = vm["topic"].as<std::vector<std::string> >();
     for (const std::string& str : topics)
     {
-      opts.addTopic(str);
+      opts.addTopicOrPattern(str);
     }
   }
   opts.default_memory_limit_ = static_cast<int>(MB_TO_BYTES * vm["size"].as<double>());
@@ -191,7 +191,7 @@ void appendParamOptions(ros::NodeHandle& nh, SnapshotterOptions& opts)
     // If it is just a string, add this topic
     if (topic_value.getType() == XmlRpcValue::TypeString)
     {
-      opts.addTopic(topic_value);
+      opts.addTopicOrPattern(topic_value);
     }
     else if (topic_value.getType() == XmlRpcValue::TypeStruct)
     {
@@ -249,7 +249,7 @@ void appendParamOptions(ros::NodeHandle& nh, SnapshotterOptions& opts)
         else
           ROS_FATAL("err");
       }
-      opts.addTopic(topic, dur, mem, cnt);
+      opts.addTopicOrPattern(topic, dur, mem, cnt);
     }
     else
       ROS_ASSERT_MSG(false, "Parameter invalid for topic %lu", i);
@@ -284,7 +284,7 @@ int main(int argc, char** argv)
   appendParamOptions(private_nh, opts);
 
   // Exit if not topics selected
-  if (!opts.topics_.size() && !opts.all_topics_)
+  if (!opts.topics_.size() && !opts.patterns_.size() && !opts.all_topics_)
   {
     ROS_FATAL("No topics selected. Exiting.");
     return 1;
