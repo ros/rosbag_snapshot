@@ -3,7 +3,7 @@ project(rosbag_snapshot)
 
 find_package(catkin REQUIRED COMPONENTS rosbag rosbag_snapshot_msgs roscpp rosgraph_msgs std_srvs topic_tools)
 
-find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(Boost REQUIRED COMPONENTS program_options regex)
 
 catkin_package(
     CATKIN_DEPENDS rosbag rosbag_snapshot_msgs roscpp rosgraph_msgs std_srvs topic_tools

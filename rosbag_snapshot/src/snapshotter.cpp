@@ -102,7 +102,7 @@ bool SnapshotterOptions::addPattern(std::string const& pattern, ros::Duration du
     ROS_INFO("Added topic pattern: %s", pattern.c_str());
     return true;
   }
-  catch (std::regex_error& e)
+  catch (boost::regex_error& e)
   {
     ROS_ERROR("Invalid topic pattern '%s': %s", pattern.c_str(), e.what());
     return false;
@@ -133,7 +133,7 @@ SnapshotterTopicPattern::SnapshotterTopicPattern(const std::string &pattern,
 {
 }
 
-const std::regex& SnapshotterTopicPattern::get_pattern() const
+const boost::regex& SnapshotterTopicPattern::get_pattern() const
 {
   return pattern_;
 }
@@ -145,7 +145,7 @@ const SnapshotterTopicOptions& SnapshotterTopicPattern::get_topic_options() cons
 
 bool SnapshotterTopicPattern::matches(const std::string &topic) const
 {
-  return std::regex_match(topic, pattern_);
+  return boost::regex_match(topic, pattern_);
 }
 
 SnapshotterClientOptions::SnapshotterClientOptions() : action_(SnapshotterClientOptions::TRIGGER_WRITE)

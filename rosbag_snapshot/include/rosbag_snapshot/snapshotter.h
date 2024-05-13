@@ -37,6 +37,7 @@
 #include <boost/atomic.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/shared_mutex.hpp>
+#include <boost/regex.hpp>
 #include <ros/ros.h>
 #include <ros/time.h>
 #include <rosbag_snapshot_msgs/TriggerSnapshot.h>
@@ -52,7 +53,6 @@
 #include <utility>
 #include <vector>
 #include <memory>
-#include <regex>
 
 namespace rosbag_snapshot
 {
@@ -95,7 +95,7 @@ class ROSBAG_DECL SnapshotterTopicPattern
   public:
   SnapshotterTopicPattern(const std::string &pattern, const SnapshotterTopicOptions &topic_options);
 
-  const std::regex& get_pattern() const;
+  const boost::regex& get_pattern() const;
   const SnapshotterTopicOptions& get_topic_options() const;
 
   // Return true if pattern matches the given topic name exactly.
@@ -103,7 +103,7 @@ class ROSBAG_DECL SnapshotterTopicPattern
 
   private:
   // Maximum difference in time from newest and oldest message in buffer before older messages are removed
-  std::regex pattern_;
+  boost::regex pattern_;
   SnapshotterTopicOptions topic_options_;
 };
 typedef std::shared_ptr<SnapshotterTopicPattern> SnapshotterTopicPatternPtr;
