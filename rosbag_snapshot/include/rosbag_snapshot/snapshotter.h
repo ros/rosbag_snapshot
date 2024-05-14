@@ -53,6 +53,7 @@
 #include <utility>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 namespace rosbag_snapshot
 {
@@ -136,6 +137,8 @@ struct ROSBAG_DECL SnapshotterOptions
   typedef std::vector<SnapshotterTopicPatternConstPtr> patterns_t;
   // List of regexs that match topics which should be tracked by the recorder.
   patterns_t patterns_;
+  // Cache of the first pattern that has matched a given topic (or nullptr if no pattern matched).
+  std::unordered_map<std::string, SnapshotterTopicPatternConstPtr> matching_patterns_cache_;
 
   SnapshotterOptions(ros::Duration default_duration_limit = ros::Duration(30), int32_t default_memory_limit = -1,
                      int32_t default_count_limit = -1, ros::Duration status_period = ros::Duration(1),

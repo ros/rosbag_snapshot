@@ -82,6 +82,7 @@ SnapshotterOptions::SnapshotterOptions(ros::Duration default_duration_limit, int
   , clear_buffer_(clear_buffer)
   , topics_()
   , patterns_()
+  , matching_patterns_cache_()
 {
 }
 
@@ -120,10 +121,20 @@ bool SnapshotterOptions::addTopicOrPattern(std::string const& topic_or_pattern,
 
 SnapshotterTopicPatternConstPtr SnapshotterOptions::findFirstMatchingPattern(const std::string &topic)
 {
-  for (const auto& pattern : patterns_)
+  if (patterns_.empty())
+    return nullptr;
+  auto it = matching_patterns_cache_.find(topic);
+  if (it != matching_patterns_cache_.end())
+    return it->second;
+  SnapshotterTopicPatternConstPtr matching_pattern = nullptr;
+  for (auto& pattern : patterns_)
     if (pattern->matches(topic))
-      return pattern;
-  return nullptr;
+    {
+      matching_pattern = pattern;
+      break;
+    }
+  matching_patterns_cache_[topic] = matching_pattern;
+  return matching_pattern;
 }
 
 SnapshotterTopicPattern::SnapshotterTopicPattern(const std::string &pattern,
