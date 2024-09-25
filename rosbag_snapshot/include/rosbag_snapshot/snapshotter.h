@@ -105,6 +105,9 @@ struct ROSBAG_DECL SnapshotterOptions
   bool clear_buffer_;
   // Compression type
   std::string compression_;
+  // Queue size for subscriptions
+  int queue_size_;
+
 
   typedef std::map<std::string, SnapshotterTopicOptions> topics_t;
   // Provides list of topics to snapshot and their limit configurations
@@ -202,8 +205,7 @@ public:
   int run();
 
 private:
-  // Subscribe queue size for each topic
-  static const int QUEUE_SIZE;
+  // Subscribe queue size for each topic 
   SnapshotterOptions options_;
   typedef std::map<std::string, boost::shared_ptr<MessageQueue> > buffers_t;
   buffers_t buffers_;
