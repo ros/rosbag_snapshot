@@ -205,7 +205,6 @@ public:
   int run();
 
 private:
-  // Subscribe queue size for each topic 
   SnapshotterOptions options_;
   typedef std::map<std::string, boost::shared_ptr<MessageQueue> > buffers_t;
   buffers_t buffers_;
