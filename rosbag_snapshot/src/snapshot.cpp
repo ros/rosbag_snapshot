@@ -134,7 +134,9 @@ bool parseVariablesMap(SnapshotterOptions& opts, po::variables_map const& vm)
   if (vm.count("queue-size"))
   {
     opts.queue_size_ = vm["queue-size"].as<int32_t>();
-  } else {
+  }
+  else
+  {
     opts.queue_size_ = 10;
   }
   return true;
