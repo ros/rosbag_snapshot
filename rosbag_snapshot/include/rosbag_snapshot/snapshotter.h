@@ -37,6 +37,7 @@
 #include <boost/atomic.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/shared_mutex.hpp>
+#include <boost/regex.hpp>
 #include <ros/ros.h>
 #include <ros/time.h>
 #include <rosbag_snapshot_msgs/TriggerSnapshot.h>
@@ -51,6 +52,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <memory>
+#include <unordered_map>
 
 namespace rosbag_snapshot
 {
@@ -86,6 +89,27 @@ struct ROSBAG_DECL SnapshotterTopicOptions
                           int32_t memory_limit = INHERIT_MEMORY_LIMIT, int32_t count_limit = INHERIT_COUNT_LIMIT);
 };
 
+/* Regular expression matching fully qualified topic names that should be tracked.
+ */
+class ROSBAG_DECL SnapshotterTopicPattern
+{
+  public:
+  SnapshotterTopicPattern(const std::string &pattern, const SnapshotterTopicOptions &topic_options);
+
+  const boost::regex& get_pattern() const;
+  const SnapshotterTopicOptions& get_topic_options() const;
+
+  // Return true if pattern matches the given topic name exactly.
+  bool matches(const std::string &topic) const;
+
+  private:
+  // Maximum difference in time from newest and oldest message in buffer before older messages are removed
+  boost::regex pattern_;
+  SnapshotterTopicOptions topic_options_;
+};
+typedef std::shared_ptr<SnapshotterTopicPattern> SnapshotterTopicPatternPtr;
+typedef std::shared_ptr<const SnapshotterTopicPattern> SnapshotterTopicPatternConstPtr;
+
 /* Configuration for the Snapshotter node. Contains default limits for memory and duration
  * and a map of topics to their limits which may override the defaults.
  */
@@ -113,6 +137,12 @@ struct ROSBAG_DECL SnapshotterOptions
   // Provides list of topics to snapshot and their limit configurations
   topics_t topics_;
 
+  typedef std::vector<SnapshotterTopicPatternConstPtr> patterns_t;
+  // List of regexs that match topics which should be tracked by the recorder.
+  patterns_t patterns_;
+  // Cache of the first pattern that has matched a given topic (or nullptr if no pattern matched).
+  std::unordered_map<std::string, SnapshotterTopicPatternConstPtr> matching_patterns_cache_;
+
   SnapshotterOptions(ros::Duration default_duration_limit = ros::Duration(30), int32_t default_memory_limit = -1,
                      int32_t default_count_limit = -1, ros::Duration status_period = ros::Duration(1),
                      bool clear_buffer = true);
@@ -122,6 +152,20 @@ struct ROSBAG_DECL SnapshotterOptions
                 ros::Duration duration_limit = SnapshotterTopicOptions::INHERIT_DURATION_LIMIT,
                 int32_t memory_limit = SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT,
                 int32_t count_limit = SnapshotterTopicOptions::INHERIT_COUNT_LIMIT);
+  // Add a new topic pattern to the configuration, returns false if the pattern is invalid
+  bool addPattern(std::string const& pattern,
+                  ros::Duration duration_limit = SnapshotterTopicOptions::INHERIT_DURATION_LIMIT,
+                  int32_t memory_limit = SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT,
+                  int32_t count_limit = SnapshotterTopicOptions::INHERIT_COUNT_LIMIT);
+
+  // Add a new topic or topic pattern to the configuration, returns false if the topic was already present
+  bool addTopicOrPattern(std::string const& topic_or_pattern,
+                         ros::Duration duration_limit = SnapshotterTopicOptions::INHERIT_DURATION_LIMIT,
+                         int32_t memory_limit = SnapshotterTopicOptions::INHERIT_MEMORY_LIMIT,
+                         int32_t count_limit = SnapshotterTopicOptions::INHERIT_COUNT_LIMIT);
+
+  // Return the first matching topic pattern that matches the given topic, otherwise null.
+  SnapshotterTopicPatternConstPtr findFirstMatchingPattern(const std::string &topic);
 };
 
 /* Stores a buffered message of an ambiguous type and it's associated metadata (time of arrival, connection data),

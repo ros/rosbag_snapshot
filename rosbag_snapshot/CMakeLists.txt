@@ -1,12 +1,18 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(rosbag_snapshot)
 
-find_package(catkin REQUIRED COMPONENTS rosbag rosbag_snapshot_msgs roscpp rosgraph_msgs std_srvs topic_tools)
+set(PACKAGE_DEPENDENCIES rosbag rosbag_snapshot_msgs roscpp rosgraph_msgs std_srvs topic_tools)
+set(PACKAGE_CATKIN_COMPONENTS ${PACKAGE_DEPENDENCIES})
+if(CATKIN_ENABLE_TESTING)
+  list(APPEND PACKAGE_CATKIN_COMPONENTS roslint rostest)
+endif()
 
-find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(catkin REQUIRED COMPONENTS ${PACKAGE_CATKIN_COMPONENTS})
+
+find_package(Boost REQUIRED COMPONENTS program_options regex)
 
 catkin_package(
-    CATKIN_DEPENDS rosbag rosbag_snapshot_msgs roscpp rosgraph_msgs std_srvs topic_tools
+    CATKIN_DEPENDS ${PACKAGE_DEPENDENCIES}
     INCLUDE_DIRS include
     LIBRARIES rosbag_snapshot
 )
@@ -21,7 +27,6 @@ add_dependencies(snapshot ${catkin_EXPORTED_TARGETS})
 target_link_libraries(snapshot rosbag_snapshot ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 if(CATKIN_ENABLE_TESTING)
-  find_package(catkin REQUIRED COMPONENTS roslint rostest)
   roslint_python(test)
   roslint_cpp()
   roslint_add_test()
