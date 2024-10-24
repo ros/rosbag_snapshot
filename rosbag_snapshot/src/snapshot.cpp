@@ -81,7 +81,9 @@ bool parseOptions(po::variables_map& vm, int argc, char** argv)
     ("topic", po::value<std::vector<std::string> >(),
      "Topic to buffer. If triggering write, write only these topics instead of all buffered topics.")
     ("compression,c", po::value<std::string>()->default_value("uncompressed"),
-     "Bag compression type. Default: uncompressed. Other options are: BZ2, LZ4.");
+     "Bag compression type. Default: uncompressed. Other options are: BZ2, LZ4.")
+    ("queue-size", po::value<int32_t>()->default_value(10),
+     "Queue size when subscribing to topics. Default: 10");
   // clang-format on
   po::positional_options_description p;
   p.add("topic", -1);
@@ -129,6 +131,14 @@ bool parseVariablesMap(SnapshotterOptions& opts, po::variables_map const& vm)
   else opts.clear_buffer_ = true;
   opts.all_topics_ = vm.count("all");
   opts.compression_ = vm["compression"].as<std::string>();
+  if (vm.count("queue-size"))
+  {
+    opts.queue_size_ = vm["queue-size"].as<int32_t>();
+  }
+  else
+  {
+    opts.queue_size_ = 10;
+  }
   return true;
 }
 
@@ -177,6 +187,8 @@ void appendParamOptions(ros::NodeHandle& nh, SnapshotterOptions& opts)
   // Set compression type
   const std::string default_compression{"uncompressed"};
   nh.param("compression", opts.compression_, default_compression);
+
+  nh.param("queue_size", opts.queue_size_, 10);
 
   if (!nh.getParam("topics", topics))
   {

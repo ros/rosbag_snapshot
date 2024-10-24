@@ -242,8 +242,6 @@ MessageQueue::range_t MessageQueue::rangeFromTimes(Time const& start, Time const
   return range_t(begin, end);
 }
 
-const int Snapshotter::QUEUE_SIZE = 10;
-
 Snapshotter::Snapshotter(SnapshotterOptions const& options) : options_(options), recording_(true), writing_(false)
 {
   status_pub_ = nh_.advertise<rosbag_snapshot_msgs::SnapshotStatus>("snapshot_status", 10);
@@ -316,7 +314,7 @@ void Snapshotter::subscribe(string const& topic, boost::shared_ptr<MessageQueue>
   shared_ptr<ros::Subscriber> sub(boost::make_shared<ros::Subscriber>());
   ros::SubscribeOptions ops;
   ops.topic = topic;
-  ops.queue_size = QUEUE_SIZE;
+  ops.queue_size = options_.queue_size_;
   ops.md5sum = ros::message_traits::md5sum<topic_tools::ShapeShifter>();
   ops.datatype = ros::message_traits::datatype<topic_tools::ShapeShifter>();
   ops.helper =
