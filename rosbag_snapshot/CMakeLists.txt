@@ -1,4 +1,9 @@
-cmake_minimum_required(VERSION 3.0.2)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.0.0)
+  cmake_minimum_required(VERSION 3.5)
+else()
+  cmake_minimum_required(VERSION 3.0.2)
+endif()
+
 project(rosbag_snapshot)
 
 find_package(catkin REQUIRED COMPONENTS rosbag rosbag_snapshot_msgs roscpp rosgraph_msgs std_srvs topic_tools)
