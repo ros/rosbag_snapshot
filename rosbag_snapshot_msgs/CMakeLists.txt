@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.13.4)
 project(rosbag_snapshot_msgs)
 
 find_package(catkin REQUIRED COMPONENTS message_generation rosgraph_msgs)
@@ -9,4 +9,3 @@ generate_messages(DEPENDENCIES rosgraph_msgs)
 catkin_package(
     CATKIN_DEPENDS message_runtime rosgraph_msgs
 )
-
